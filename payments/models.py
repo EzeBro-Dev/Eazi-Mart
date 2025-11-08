@@ -44,7 +44,7 @@ class Payment(models.Model):
         return f"Payment #{self.transaction_id} for Order #{self.order.order_number}"
     
 
-class Refunded(models.Model):
+class Refund(models.Model):
     STATUS_CHOICES = [
         ('requested', 'Requested'),
         ('approved', 'Approved'),
@@ -102,3 +102,32 @@ class Payout(models.Model):
 
     def __str__(self):
         return f"Payout #{self.id} for Seller #{self.seller.id}"
+    
+
+class Transaction(models.Model):
+    TYPE_CHOICES = [
+        ('refund', 'Refund'),
+        ('payout', 'Payout'),
+        ('sale', 'Sale'),
+        ('fee', 'Fee'),
+    ]
+
+    payment = models.ForeignKey(Payment, on_delete=models.CASCADE, related_name='transactions')
+    payout = models.ForeignKey(Payout, on_delete=models.CASCADE, related_name='transactions', blank=True, null=True)
+    transaction_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='sale')
+    amount = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0.01)])
+    currency = models.CharField(max_length=3, default='NGN')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    payment_method = models.CharField(max_length=20, choices=Payment.Payment_Method_CHOICES, default='card')
+    metadata = models.JSONField(blank=True, null=True)
+    description = models.CharField(max_length=255, blank=True, null=True)
+
+
+    class Meta:
+        db_table = 'transactions'
+        ordering = ['-created_at']
+
+
+    def __str__(self):
+        return f"Transaction #{self.id} for Payment #{self.payment.id}"
