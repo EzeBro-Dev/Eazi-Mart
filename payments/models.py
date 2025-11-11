@@ -2,6 +2,7 @@ from django.db import models
 from django.core.validators import MinValueValidator
 from orders.models import Order
 from users.models import User, SellerProfile
+from decimal import Decimal
 
 class Payment(models.Model):
 
@@ -43,6 +44,15 @@ class Payment(models.Model):
     def __str__(self):
         return f"Payment #{self.transaction_id} for Order #{self.order.order_number}"
     
+    
+    @property
+    def fee_amount(self):
+        return self.amount * Decimal('0.03')
+
+    @property
+    def net_amount(self):
+        return self.amount - self.fee_amount
+    
 
 class Refund(models.Model):
     STATUS_CHOICES = [
@@ -61,7 +71,7 @@ class Refund(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     provider_refund_id = models.CharField(max_length=255, blank=True, null=True)
     processed_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True, related_name='processed_refunds')
-    processed_at = models.DateTimeField(blank=True, name=True)
+    processed_at = models.DateTimeField(blank=True, null=True)
 
 
     class Meta:

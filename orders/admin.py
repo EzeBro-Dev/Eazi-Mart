@@ -40,7 +40,7 @@ class OrderShippingAdmin(admin.ModelAdmin):
 
 @admin.register(Cart)
 class CartAdmin(admin.ModelAdmin):
-    list_display = ('user', 'total_items', 'total_price', 'updated_at' 'subtotal' )
+    list_display = ('user', 'subtotal', 'created_at', 'updated_at')
     readonly_fields = ('created_at', 'updated_at' )
     
 
