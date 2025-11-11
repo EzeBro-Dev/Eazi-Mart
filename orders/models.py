@@ -14,6 +14,7 @@ class Order(models.Model):
         ('cancelled', 'Cancelled'),
         ('refunded', 'Refunded'),
         ('returned', 'Returned'),
+
     ]
     buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
     order_number = models.CharField(max_length=20, unique=True)
@@ -30,14 +31,13 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+
     class Meta:
         db_table = 'orders'
         ordering = ['-created_at']
 
-
     def __str__(self):
-        return f"Order #{self.order_number} by {self.buyer.email}"
-    
+        return f'Order #{self.order_number} by {self.buyer.email}'
 
     def save(self, *args, **kwargs):
         if not self.order_number:
@@ -47,8 +47,7 @@ class Order(models.Model):
             self.order_number = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
 
         super().save(*args, **kwargs)
-
-
+            
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
@@ -63,18 +62,17 @@ class OrderItem(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
+
     class Meta:
         db_table = 'order_items'
 
-
     def __str__(self):
-        return f"{self.product_name} * {self.quantity}"
-    
+        return f' {self.product_name} * {self.quantity} '
+
 
     @property
     def total_price(self):
         return self.quantity * self.price
-
 
 
 class ShippingMethod(models.Model):
@@ -86,33 +84,38 @@ class ShippingMethod(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-
     class Meta:
         db_table = 'shipping_methods'
-    
 
     def __str__(self):
         return self.name
-    
 
 class OrderShipping(models.Model):
-    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='shipping_info')
-    shipping_method = models.ForeignKey(ShippingMethod, on_delete=models.PROTECT)
+    order = models.OneToOneField(
+        Order, 
+        on_delete=models.CASCADE, 
+        related_name='shipping_info'
+    )
+    shipping_method = models.ForeignKey(
+        ShippingMethod, 
+        on_delete=models.PROTECT
+    )
     tracking_number = models.CharField(max_length=100, blank=True)
     carrier = models.CharField(max_length=100, blank=True)
     shipped_at = models.DateTimeField(null=True, blank=True)
-    estimated_delivery = models.DateTimeField(null=True, blank=True)
+    estimated_delivery = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-
     class Meta:
-        db_table = 'shipping_info'
-
-
+        db_table = 'order_shipping'
 
 class Cart(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='cart')
+    user = models.OneToOneField(
+        User, 
+        on_delete=models.CASCADE, 
+        related_name='cart'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -120,20 +123,31 @@ class Cart(models.Model):
     class Meta:
         db_table = 'carts'
 
-
     @property
     def total_items(self):
         return sum(item.quantity for item in self.items.all())
-    
+
+
     @property
     def subtotal(self):
         return sum(item.total_price for item in self.items.all())
-    
 
 class CartItem(models.Model):
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='cart_items')
-    variant = models.ForeignKey(ProductVariant, on_delete=models.CASCADE, related_name='cart_items')
+    cart = models.ForeignKey(
+        Cart, 
+        on_delete=models.CASCADE, 
+        related_name='items'
+    )
+    product = models.ForeignKey(
+        Product, 
+        on_delete=models.CASCADE, 
+        related_name='cart_items'
+    )
+    variant = models.ForeignKey(
+        ProductVariant, 
+        on_delete=models.CASCADE, 
+        related_name='cart_items'
+    )
     quantity = models.IntegerField(validators=[MinValueValidator(1)])
     price = models.DecimalField(max_digits=10, decimal_places=2)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -145,17 +159,16 @@ class CartItem(models.Model):
         db_table = 'cart_items'
         unique_together = ['cart', 'product', 'variant']
 
-
     def __str__(self):
-        return f"{self.product.title} * {self.quantity}"
-    
+        return f'{self.product.title} * {self.quantity}'
 
+    @property
     def unit_price(self):
         if self.variant:
             return self.variant.price
         return self.product.price
-    
 
+    
     @property
     def total_price(self):
         return self.unit_price * self.quantity

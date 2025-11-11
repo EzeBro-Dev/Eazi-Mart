@@ -164,5 +164,3 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:3008',
     'http://127.0.0.1:3000'
 ]
-
-AUTH_USER_MODEL = 'users.User'
