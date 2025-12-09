@@ -105,3 +105,19 @@ class Address(models.Model):
 
     def __str__(self):
         return f"{self.street_address}, {self.city}, {self.country}"
+    
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    bio = models.TextField(blank=True)
+    profile_picture = models.URLField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    date_of_birth = models.DateField(blank=True, null=True)
+    preffered_currency = models.CharField(max_length=3, default= 'NGN')
+
+    class Meta:
+        db_table = 'user_profiles'
+
+    def _str_(self):
+        return f"{self.user.email}'s profile"
