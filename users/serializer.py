@@ -14,6 +14,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'first_name': {'required': True},
             'last_name': {'required': True},
+            'password': {'write_only': True},
         }
 
     def validate(self, attrs):
@@ -41,14 +42,14 @@ class SellerProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SellerProfile
-        fields = '_all_'
+        fields = '__all__'
         read_only_fields = ('user', 'verified', 'kyc_status', 'created_at', 'updated_at')
 
 
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
-        fields = '_all_'
+        fields = '__all__'
         read_only_fields = ('user', 'created_at', 'updated_at')
 
 

@@ -119,5 +119,5 @@ class UserProfile(models.Model):
     class Meta:
         db_table = 'user_profiles'
 
-    def _str_(self):
+    def __str__(self):
         return f"{self.user.email}'s profile"
